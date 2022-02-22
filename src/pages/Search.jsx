@@ -16,28 +16,18 @@ export default class Search extends Component {
       nameSearched: '',
       findedAlbum: [],
       renderAlbuns: false,
+      pesquisado: '',
     };
   }
-
-  // componentDidMount() {
-  //   this.requestAlbum();
-  // }
 
   requestAlbum = async () => {
     const { nameSearched } = this.state;
     searchAlbumsAPI(nameSearched).then((album) => {
-      console.log(album);
       this.setState({
         loading: false,
         findedAlbum: album,
       });
     });
-    // searchAlbumsAPI(nameSearched).then(({ album }) => {
-    //   this.setState({
-    //     loading: false,
-    //     findedAlbum: album,
-    //   });
-    // });
   }
 
   checkInput = () => {
@@ -61,6 +51,11 @@ export default class Search extends Component {
 
   handleSubmit = async (e) => {
     e.preventDefault();
+    const { nameSearched } = this.state;
+    const albumPesquisado = nameSearched;
+    this.setState({
+      pesquisado: albumPesquisado,
+    });
 
     this.setState({
       nameSearched: '',
@@ -74,7 +69,12 @@ export default class Search extends Component {
   }
 
   render() {
-    const { nameSearched, btnIsDisabled, loading, findedAlbum, renderAlbuns } = this.state;
+    const { nameSearched,
+      btnIsDisabled,
+      loading,
+      findedAlbum,
+      renderAlbuns,
+      pesquisado } = this.state;
     const renderedAlbuns = findedAlbum.map((album) => (
       <Link
         to={ `/album/${album.collectionId}` }
@@ -88,8 +88,14 @@ export default class Search extends Component {
           {' '}
         </p>
       </Link>
-
     ));
+
+    const whyRender = (
+      <div>
+        <h2>{`Resultado de álbuns de: ${pesquisado}`}</h2>
+        {renderedAlbuns}
+      </div>
+    );
 
     const searchDiv = (
       <div data-testid="page-search">
@@ -112,16 +118,13 @@ export default class Search extends Component {
           </button>
         </form>
 
-        {renderAlbuns && findedAlbum.length > 0 ? renderedAlbuns: <p>Nenhum álbum foi encontrado</p>}
-        {/* {findedAlbum.map((album) => (
-          <p>{album.collectionName}</p>
-        ))} */}
+        {renderAlbuns
+        && findedAlbum.length > 0 ? whyRender : <p>Nenhum álbum foi encontrado</p>}
       </div>
     );
     return (
       <div>
         { loading ? <Loading /> : searchDiv}
-
       </div>
     );
   }
