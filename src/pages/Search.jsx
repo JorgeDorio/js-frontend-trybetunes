@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import Loading from '../components/Loading';
+import searchAlbumsAPI from '../services/searchAlbumsAPI';
 
 const minLengthName = 2;
 
@@ -8,9 +11,33 @@ export default class Search extends Component {
     super();
 
     this.state = {
+      loading: false,
       btnIsDisabled: true,
       nameSearched: '',
+      findedAlbum: [],
+      renderAlbuns: false,
     };
+  }
+
+  // componentDidMount() {
+  //   this.requestAlbum();
+  // }
+
+  requestAlbum = async () => {
+    const { nameSearched } = this.state;
+    searchAlbumsAPI(nameSearched).then((album) => {
+      console.log(album);
+      this.setState({
+        loading: false,
+        findedAlbum: album,
+      });
+    });
+    // searchAlbumsAPI(nameSearched).then(({ album }) => {
+    //   this.setState({
+    //     loading: false,
+    //     findedAlbum: album,
+    //   });
+    // });
   }
 
   checkInput = () => {
@@ -34,11 +61,37 @@ export default class Search extends Component {
 
   handleSubmit = async (e) => {
     e.preventDefault();
+
+    this.setState({
+      nameSearched: '',
+      btnIsDisabled: true,
+      loading: true,
+    });
+    await this.requestAlbum();
+    this.setState({
+      renderAlbuns: true,
+    });
   }
 
   render() {
-    const { nameSearched, btnIsDisabled } = this.state;
-    return (
+    const { nameSearched, btnIsDisabled, loading, findedAlbum, renderAlbuns } = this.state;
+    const renderedAlbuns = findedAlbum.map((album) => (
+      <Link
+        to={ `/album/${album.collectionId}` }
+        key={ album.collectionId }
+        data-testid={ `link-to-album-${album.collectionId}` }
+      >
+        <h2>{album.artistName}</h2>
+        <p>
+          {' '}
+          {album.collectionName}
+          {' '}
+        </p>
+      </Link>
+
+    ));
+
+    const searchDiv = (
       <div data-testid="page-search">
         <Header />
         <form onSubmit={ this.handleSubmit }>
@@ -56,9 +109,19 @@ export default class Search extends Component {
             disabled={ btnIsDisabled }
           >
             Pesquisar
-
           </button>
         </form>
+
+        {renderAlbuns && findedAlbum.length > 0 ? renderedAlbuns: <p>Nenhum álbum foi encontrado</p>}
+        {/* {findedAlbum.map((album) => (
+          <p>{album.collectionName}</p>
+        ))} */}
+      </div>
+    );
+    return (
+      <div>
+        { loading ? <Loading /> : searchDiv}
+
       </div>
     );
   }

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import Loading from '../components/Loading';
-import LoginForm from '../components/LoginForm';
 import { createUser } from '../services/userAPI';
 
 const minLengthName = 3;
@@ -49,24 +48,33 @@ export default class Login extends Component {
     });
   }
 
-  generateForm = () => {
-    const { loginName, btnIsDisabled } = this.state;
-
-    return (
-      <LoginForm
-        handleSubmit={ this.handleSubmit }
-        handleChange={ this.handleChange }
-        loginName={ loginName }
-        btnIsDisabled={ btnIsDisabled }
-      />
-    );
-  }
-
   render() {
-    const { loading, isRedirect } = this.state;
-    return (
+    const { loading, isRedirect, loginName, btnIsDisabled } = this.state;
+    const loginDiv = (
       <div data-testid="page-login">
-        { loading ? <Loading /> : this.generateForm() }
+        <form onSubmit={ this.handleSubmit }>
+          <input
+            type="text"
+            data-testid="login-name-input"
+            onChange={ this.handleChange }
+            value={ loginName }
+            name="loginName"
+            placeholder="Insira seu nome"
+          />
+          <button
+            disabled={ btnIsDisabled }
+            type="submit"
+            data-testid="login-submit-button"
+          >
+            Entrar
+
+          </button>
+        </form>
+      </div>
+    );
+    return (
+      <div>
+        { loading ? <Loading /> : loginDiv }
         { isRedirect && <Redirect to="/search" /> }
       </div>
     );
