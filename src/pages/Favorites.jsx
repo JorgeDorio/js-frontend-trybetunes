@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
-import { getFavoriteSongs } from '../services/favoriteSongsAPI';
+import { getFavoriteSongs, removeSong } from '../services/favoriteSongsAPI';
 
 export default class Favorites extends Component {
   constructor() {
@@ -24,6 +24,14 @@ export default class Favorites extends Component {
         favMusics: music,
       });
     });
+  };
+
+  rmToFavorite = async (music) => {
+    this.setState({
+      loading: true,
+    });
+    removeSong(music).then(this.ativarLoading);
+    this.getFavSongs();
   };
 
   render() {
@@ -56,8 +64,11 @@ export default class Favorites extends Component {
                       type="checkbox"
                       name={ music.trackId }
                       id={ music.trackId }
-                      onChange={ () => {
-                        this.addToFavorite(music);
+                      onChange={ (event) => {
+                        const teste = event.target.checked === true
+                          ? this.addToFavorite(music)
+                          : this.rmToFavorite(music);
+                        return teste;
                       } }
                       checked={
                         favMusics.filter(
